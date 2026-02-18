@@ -1,0 +1,16 @@
+{
+    "name": "store-mvp",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "dev": "concurrently \"cd server && node server.js\" \"cd client && npm start\"",
+        "dev:client": "cd client && npm start",
+        "dev:server": "cd server && node server.js"
+    },
+    "dependencies": {
+        "square": "^44.0.0"
+    },
+    "devDependencies": {
+        "concurrently": "^9.1.2"
+    }
+}
