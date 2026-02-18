@@ -1,18 +1,7 @@
 const { SquareClient, SquareEnvironment } = require('square');
 const crypto = require('crypto');
 
-// Initialize the Square Client
-const client = new SquareClient({
-    token: process.env.SQUARE_ACCESS_TOKEN,
-    environment: SquareEnvironment.Sandbox,
-});
-
 module.exports = async function handler(req, res) {
-    // Only allow POST
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method not allowed' });
-    }
-
     // Enable CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -22,9 +11,31 @@ module.exports = async function handler(req, res) {
         return res.status(200).end();
     }
 
+    // Only allow POST
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed' });
+    }
+
+    // Check that the token exists
+    const token = process.env.SQUARE_ACCESS_TOKEN;
+    if (!token) {
+        console.error('❌ SQUARE_ACCESS_TOKEN is not set!');
+        return res.status(500).json({
+            success: false,
+            error: 'Server misconfiguration: payment token not found'
+        });
+    }
+
+    // Initialize Square Client inside the handler so env vars are guaranteed available
+    const client = new SquareClient({
+        token: token,
+        environment: SquareEnvironment.Sandbox,
+    });
+
     const { sourceId, amount } = req.body;
     console.log('--- Processing Payment ---');
     console.log('Amount:', amount);
+    console.log('Token present:', !!token, '| Length:', token.length);
 
     try {
         const response = await client.payments.create({
